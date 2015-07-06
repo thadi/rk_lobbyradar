@@ -1,5 +1,5 @@
 from rdflib import Graph
-g = Graph('Sleepycat');
+g = Graph('Sleepycat')
 
 g.open('/home/thade/tmp/Wissenrep/lobbyradar_test', create=True)
 
