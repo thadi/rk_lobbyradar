@@ -1,7 +1,7 @@
 import pymongo
 
 #connect to localhost
-connection = pymongo.Connection()
+connection = pymongo.MongoClient('localhost', 27017)
 #get lobbyradar as db
 #make sure you have an db named lobbyradar
 #mongorestore -db lobbyradar -collection ...
@@ -25,9 +25,23 @@ for current_object in collection_to_iterate.find():
     #current_object contains the current object (bson)
     #with current_object.get(<field_name>) you get the specefied field value
     print(current_object)
-    if(limit != 0):
+    if limit != 0:
         count += 1
-        if(count >= limit):
+        if count >= limit:
             break
+'''
+gets a collection and returns a normalized list with unique values
+for a given key.
+'''
+def get_items(data, key):
+    items = set()
+    for row in data.find():
+        items.add(row[key])
+    items_list = list(items)
+    items_list = [x.lower() for x in items_list]
+    items_list = [str(x) for x in items_list]
+    items_list = sorted(items_list)
+    return items_list
 
+print get_items(relations, "type")
 print('done')

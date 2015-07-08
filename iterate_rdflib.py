@@ -10,7 +10,7 @@ count = 0
 for source, relation, target in graph:
     triple = source + ' has relation ' + relation + ' to ' + target
     print(triple)
-    if(limit != 0):
+    if limit != 0:
         count += 1
-        if(count >= limit):
+        if count >= limit:
             break;
