@@ -25,9 +25,19 @@ for current_object in collection_to_iterate.find():
     #current_object contains the current object (bson)
     #with current_object.get(<field_name>) you get the specefied field value
     print(current_object)
-    if(limit != 0):
+    if limit != 0:
         count += 1
-        if(count >= limit):
+        if count >= limit:
             break
+'''
+gets a collection and returns a normalized list with unique values
+for a given key.
+'''
+def get_items(data, key):
+    items = set()
+    for row in data.find():
+        items.add(row[key])
+    return sorted([str(x.lower()) for x in list(items)])
 
+print get_items(relations, "type")
 print('done')
