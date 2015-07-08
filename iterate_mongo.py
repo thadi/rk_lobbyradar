@@ -37,11 +37,7 @@ def get_items(data, key):
     items = set()
     for row in data.find():
         items.add(row[key])
-    items_list = list(items)
-    items_list = [x.lower() for x in items_list]
-    items_list = [str(x) for x in items_list]
-    items_list = sorted(items_list)
-    return items_list
+    return sorted([str(x.lower()) for x in list(items)])
 
 print get_items(relations, "type")
 print('done')
