@@ -11,7 +11,7 @@ graph.open('rdflib_data', create=True)
 
 #connect to mongodb
 import pymongo
-connection = pymongo.Connection()
+connection = pymongo.MongoClient('localhost', 27017)
 db = connection.lobbyradar
 relations = db.relations
 entities = db.entities

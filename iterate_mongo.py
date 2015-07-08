@@ -1,7 +1,7 @@
 import pymongo
 
 #connect to localhost
-connection = pymongo.Connection()
+connection = pymongo.MongoClient('localhost', 27017)
 #get lobbyradar as db
 #make sure you have an db named lobbyradar
 #mongorestore -db lobbyradar -collection ...
