@@ -52,6 +52,9 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+ 
+# ipython notebook checkpoints
+.ipynb_checkpoints/
 
 # PyBuilder
 target/
