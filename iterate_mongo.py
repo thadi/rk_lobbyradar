@@ -39,6 +39,6 @@ def get_items(data, key):
         items.add(row[key])
     return sorted([str(x.lower()) for x in list(items)])
 
-#print get_items(entities, "type")
-iterate_collection(entities, 0)
+print get_items(entities, "name")
+# iterate_collection(entities, 0)
 print('done')
