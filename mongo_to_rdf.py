@@ -26,6 +26,9 @@ g.bind("foaf", FOAF)
 g.bind("org", ORG)
 g.bind("rdf", RDF)
 g.bind("rdfs", RDFS)
+
+g.parse('ontolo.ttl', format='turtle')
+
 for entity in Entities.find({}):
     node = BNode()
 
@@ -59,10 +62,12 @@ def plot_triples(connections_triple, figsize=(20,10)):
     plt.show()
 
 qres = g.query("""
-    SELECT ?s ?p
+    SELECT ?a ?s ?c
     WHERE {
-          ?s rdfs:label "Hubert Reiff" .
-          ?p foaf:knows ?s
+          ?s rdfs:label "Angel" .
+          ?p foaf:knows ?s .
+          ?s rdfs:label ?c .
+          ?p rdfs:label ?a .
     }
     LIMIT 20
     """)
