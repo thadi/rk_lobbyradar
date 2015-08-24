@@ -40,5 +40,5 @@ def get_items(data, key):
     return sorted([str(x.lower()) for x in list(items)])
 
 #print get_items(entities, "type")
-iterate_collection(entities, 0)
+iterate_collection(relations, 0)
 print('done')
