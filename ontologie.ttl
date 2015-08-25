@@ -1,0 +1,19 @@
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix cgov: <http://reference.data.gov.uk/def/central-governemnt/> .
+
+# T-Box
+  # Classes
+foaf:Person       a                rdfs:Class .
+
+cgov:Politican    a                rdfs:Class;
+                  rdfs:subClassOf  foaf:Person .
+
+  # Properties
+foaf:connection   a                 rdf:Property;
+                  rdfs:domain       rdfs:Class;
+                  rdfs:range        rdfs:Class .

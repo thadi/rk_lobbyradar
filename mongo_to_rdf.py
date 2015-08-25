@@ -64,12 +64,11 @@ def plot_triples(connections_triple, figsize=(20,10)):
 qres = g.query("""
     SELECT ?a ?s ?c
     WHERE {
-          ?s rdfs:label "Angel" .
+          ?s rdfs:label "Angela Merkel" .
           ?p foaf:knows ?s .
           ?s rdfs:label ?c .
           ?p rdfs:label ?a .
     }
-    LIMIT 20
     """)
 #for s,p,t in qres:
 #    print(s)
