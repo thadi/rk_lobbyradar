@@ -12,8 +12,63 @@ foaf:Person       a                rdfs:Class .
 
 cgov:Politican    a                rdfs:Class;
                   rdfs:subClassOf  foaf:Person .
+                  
+org:Organization  a                rdfs:Class .
+
+cgov:Party        a                rdfs:Class;
+                  rdfs:subClassOf  org:Organisation .
 
   # Properties
+org:donation      a                 rdf:Property;
+                  rdfs:domain       rdfs:Class;
+                  rdfs:range        org:Organisation .
+                  
+org:association   a                 rdf:Property;
+                  rdfs:domain       org:Organisation;
+                  rdfs:range        org:Organisation .
+                  
 foaf:connection   a                 rdf:Property;
                   rdfs:domain       rdfs:Class;
                   rdfs:range        rdfs:Class .
+                  
+foaf:temporary    a                 rdf:Property;
+                  rdfs:domain       rdfs:Class;
+                  rdfs:range        org:Organisation .
+                  
+foaf:activity     a                 rdf:Property;
+                  rdfs:subClassOf   foaf:temporary;
+                  rdfs:domain       foaf:Person;
+                  rdfs:range        org:Organisation .
+                  
+org:committee     a                 rdf:Property;
+                  rdfs:subClassOf   foaf:temporary;
+                  rdfs:domain       rdfs:Class;
+                  rdfs:range        org:Organisation
+                  
+foaf:commercial   a                 rdf:Property;
+                  rdfs:domain       rdfs:Class;
+                  rdfs:range        org:Organisation .
+                  
+foaf:subsidiary   a                 rdf:Property;
+                  rdfs:subClassOf   foaf:commercial;
+                  rdfs:domain       rdfs:Organisation;
+                  rdfs:range        org:Organisation .
+                  
+foaf:business     a                 rdf:Property;
+                  rdfs:subClassOf   foaf:commercial;
+                  rdfs:domain       rdfs:Class;
+                  rdfs:range        org:Organisation .
+                  
+foaf:member       a                 rdf:Property;
+                  rdfs:domain       rdfs:Class;
+                  rdfs:range        org:Organisation .
+                  
+org:executive     a                 rdf:Property;
+                  rdfs:subClassOf   foaf:member;
+                  rdfs:domain       org:Organisation;
+                  rdfs:range        foaf:person .
+                  
+org:government     a                rdf:Property;
+                  rdfs:subClassOf   foaf:member;
+                  rdfs:domain       foaf:person;
+                  rdfs:range        org:Organisation .
