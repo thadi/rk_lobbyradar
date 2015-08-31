@@ -7,29 +7,36 @@ db = client.lobbyradar
 Entities = db.entities
 Relations = db.relations
 
-r_type = 'member'
+def check_relation_type(relation_type, display = 5):
+    relation_cursor = Relations.find({'type': relation_type})
+    general_count = 0
+    person_to_org = 0
+    org_to_org = 0
+    errors = 0
 
-rel_cur = Relations.find({'type': r_type})
+    for relation in relation_cursor:
+        if len(relation['entities']) < 2:
+            errors += 1
+            continue
+        source_id = relation['entities'][0]
+        target_id = relation['entities'][1]
+        source = Entities.find_one({'_id': ObjectId(source_id)})
+        target = Entities.find_one({'_id': ObjectId(target_id)})
+        if source and target:
+            if source['type'] == 'person' and target['type'] == 'entity':
+                person_to_org += 1
+            elif source['type'] == 'entity' and target['type'] == 'entity':
+                org_to_org += 1
+            else:
+                errors += 1
+            if general_count < display:
+                print source['name'] + ' (' + source['type'] + ')' + " has relation " + relation_type + ' to ' + target['name'] + ' (' + target['type'] + ')'
+                print "\n"
+        general_count += 1
+    print "stats for relation type " + relation_type
+    print "count relation: " + str(general_count)
+    print "\t person to organization: " + str(person_to_org)
+    print "\t organization to organization: " + str(org_to_org)
+    print "\t errors: " + str(errors)
 
-count = 0
-
-ue = 0
-e = 0
-
-for relation in rel_cur:
-    if len(relation['entities']) < 2: continue
-    sid = relation['entities'][0]
-    tid = relation['entities'][1]
-    sobj = Entities.find_one({'_id': ObjectId(sid)})
-    tobj = Entities.find_one({'_id': ObjectId(tid)})
-    if sobj and tobj:
-        if sobj['type'] == tobj['type']: e += 1
-        else: ue += 1
-        if count < 10:
-            print sobj['name'] + '(' + sobj['type'] + ')'
-            print " has relation " + r_type + ' to '
-            print tobj['name'] + '(' + tobj['type'] + ')'
-            print "\n"
-            count += 1
-print "same type: " + str(e)
-print "not same type: " + str(ue)
+check_relation_type('member', 5)

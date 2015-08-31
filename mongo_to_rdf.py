@@ -11,6 +11,7 @@ from rdflib import Graph, Literal, BNode, Namespace, RDF, RDFS, URIRef
 FOAF = Namespace('http://xmlns.com/foaf/0.1/')
 DC = Namespace('http://purl.org/dc/elements/1.1/')
 ORG = Namespace("http://www.w3.org/ns/org#")
+CGOV = Namespace('http://reference.data.gov.uk/def/central-government')
 
 client = MongoClient()
 db = client.lobbyradar
@@ -19,6 +20,52 @@ Entities = db.entities
 Relations = db.relations
 
 rdf_type = {"person": FOAF.Person, "entity": ORG.Organization}
+rdf_property_keys = {
+    'member': 'Mitglied member mitglied'.split(' '),
+    'executive': 'Vorsitzender ececutive executive'.split(' '),
+    'connection': 'Bundesdatenschutzbeauftragte Hausausweise consulting lobbyist publication sponsoring'.split(' '),
+    'association': 'association'.split(' '),
+    'donation': 'donation'.split(' '),
+    'committee': 'committee'.split(' '),
+    'activity': 'activity'.split(' '),
+    'business': 'business'.split(' '),
+    'subsidiary': 'Tochterfirma subsidiary subisdiary'.split(' '),
+    'government': 'government'.split(' '),
+    'position': 'Position position'.split(' ')
+}
+rdf_property = {
+    'member': FOAF.member,
+    'executive': ORG.executive,
+    'connection': FOAF.connection,
+    'association': ORG.association,
+    'donation': ORG.donation,
+    'committee': ORG.committee,
+    'activity': FOAF.activity,
+    'business': ORG.business,
+    'subsidiary': ORG.subsidiary,
+    'government': CGOV.government,
+    'position': ORG.position
+}
+
+def get_property(property_key):
+    if property_key in rdf_property:
+        return rdf_property[property_key]
+    return False
+
+def get_property_key(relation_type):
+    for key in rdf_property_keys:
+        if relation_type in rdf_property_keys[key]:
+            return key
+    return False
+
+def get_prop(relation_type):
+    return get_property(get_property_key(relation_type))
+
+def make_special_deklaration(key, source, target):
+    if key == 'donation':
+        g.add((target, RDF.type, CGOV.Party))
+    elif key == 'government':
+        g.add((source, RDF.type, CGOV.Politican))
 
 g = Graph()
 g.bind("dc", DC)
@@ -26,8 +73,9 @@ g.bind("foaf", FOAF)
 g.bind("org", ORG)
 g.bind("rdf", RDF)
 g.bind("rdfs", RDFS)
+g.bind("cgov", CGOV)
 
-g.parse('ontolo.ttl', format='turtle')
+g.parse('ontologie.ttl', format='turtle')
 
 for entity in Entities.find({}):
     node = BNode()
@@ -43,17 +91,50 @@ for relation in Relations.find({}):
     source = g.value(predicate=DC.identifier, object=Literal(str(relation['entities'][0])))
     target = g.value(predicate=DC.identifier, object=Literal(str(relation['entities'][1])))
 
-    if not source or not target: continue
+    source_type = g.value(subject=source, predicate=RDF.type)
+    target_type = g.value(subject=target, predicate=RDF.type)
 
-    g.add((source, FOAF.knows, target))
+    if not source or not target: continue
+    if source_type == ORG.Organization and target_type == FOAF.Person:
+        source, target = target, source
+    prop = get_prop(relation['type'])
+    make_special_deklaration(get_property_key(relation['type']), source, target)
+    if(prop):
+        g.add((source, prop, target))
+    else:
+        print(relation['type'])
 
 print("imported all entities and relations...")
 
+def plot_set(entities, figsize=(20,10)):
+    G = nx.Graph()
+    for sub in entities:
+        G.add_node(sub[0], typ='sub')
+    colors = [ 'green' if G.node[node]['typ'] == 'obj' else 'red' for node in G.nodes() ]
+    plt.rcParams['figure.figsize'] = figsize
+    plt.rcParams['font.family'] = 'sans-serif'
+    nx.draw_networkx(G, node_color=colors, node_size=1000, linewidths=0, font_size=16)
+    plt.show()
+
+def plot_double(connections_double, prop, figsize=(20,10)):
+    G = nx.Graph()
+    for ops in connections_double:
+        sub, obj = ops
+        G.add_node(sub, typ='sub')
+        G.add_node(obj, typ='obj')
+        G.add_edge(obj, sub, label=prop)
+    colors = [ 'green' if G.node[node]['typ'] == 'obj' else 'red' for node in G.nodes() ]
+    plt.rcParams['figure.figsize'] = figsize
+    plt.rcParams['font.family'] = 'sans-serif'
+    nx.draw_networkx(G, node_color=colors, node_size=1000, linewidths=0, font_size=16)
+    plt.show()
+
 def plot_triples(connections_triple, figsize=(20,10)):
     G = nx.Graph()
-    for obj, prt, sub in connections_triple:
-        G.add_node(obj, typ='obj')
+    for ops in connections_triple:
+        sub, prt, obj = ops
         G.add_node(sub, typ='sub')
+        G.add_node(obj, typ='obj')
         G.add_edge(obj, sub, label=prt)
     colors = [ 'green' if G.node[node]['typ'] == 'obj' else 'red' for node in G.nodes() ]
     plt.rcParams['figure.figsize'] = figsize
@@ -62,18 +143,17 @@ def plot_triples(connections_triple, figsize=(20,10)):
     plt.show()
 
 qres = g.query("""
-    SELECT ?a ?s ?c
+    SELECT ?d
     WHERE {
-          ?s rdfs:label "Angela Merkel" .
-          ?p foaf:knows ?s .
-          ?s rdfs:label ?c .
-          ?p rdfs:label ?a .
+          ?a rdf:type cgov:Politican .
+          ?a rdfs:label ?d .
     }
     """)
+print qres
 #for s,p,t in qres:
 #    print(s)
 #    print(p)
 #    print(t)
 #    print('-----------')
 #plot_triples([ (con[0].toPython(), con[1].toPython(), con[2].toPython()) for con in qres ])
-plot_triples(qres)
+plot_set(qres)
