@@ -61,9 +61,13 @@ def get_property_key(relation_type):
 def get_prop(relation_type):
     return get_property(get_property_key(relation_type))
 
-def make_special_deklaration(key, source, target):
+map_got_donation = {}
+def make_special_deklaration(key, source, target, sname, tname):
     if key == 'donation':
-        g.add((target, RDF.type, CGOV.Party))
+        if target not in map_got_donation.keys(): map_got_donation[target] = 0
+        map_got_donation[target] += 1
+        if(map_got_donation[target] > 5):
+            g.add((target, RDF.type, CGOV.Party))
     elif key == 'government':
         g.add((source, RDF.type, CGOV.Politican))
 
@@ -94,11 +98,14 @@ for relation in Relations.find({}):
     source_type = g.value(subject=source, predicate=RDF.type)
     target_type = g.value(subject=target, predicate=RDF.type)
 
+    source_name = g.value(subject=source, predicate=RDFS.label)
+    target_name = g.value(subject=target, predicate=RDFS.label)
+
     if not source or not target: continue
     if source_type == ORG.Organization and target_type == FOAF.Person:
         source, target = target, source
     prop = get_prop(relation['type'])
-    make_special_deklaration(get_property_key(relation['type']), source, target)
+    make_special_deklaration(get_property_key(relation['type']), source, target, source_name, target_name)
     if(prop):
         g.add((source, prop, target))
     else:
@@ -143,17 +150,22 @@ def plot_triples(connections_triple, figsize=(20,10)):
     plt.show()
 
 qres = g.query("""
-    SELECT ?d
+    SELECT ?c ?d
     WHERE {
           ?a rdf:type cgov:Politican .
-          ?a rdfs:label ?d .
+          ?a foaf:member ?b .
+          ?a rdfs:label ?c .
+          ?b rdf:type cgov:Party .
+          ?b rdfs:label ?d .
     }
     """)
-print qres
 #for s,p,t in qres:
 #    print(s)
 #    print(p)
 #    print(t)
 #    print('-----------')
 #plot_triples([ (con[0].toPython(), con[1].toPython(), con[2].toPython()) for con in qres ])
-plot_set(qres)
+#for s in qres:
+#    print s
+#    break
+plot_double(qres, 'member')
