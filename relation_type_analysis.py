@@ -1,12 +1,23 @@
+#import of the needed libraries
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
+#connection to the local mongodb
 client = MongoClient()
+#select the db lobbyradar (in our case)
 db = client.lobbyradar
 
+#the two needed collections
 Entities = db.entities
 Relations = db.relations
 
+#iterates over all relations with the given type,
+#displays a specifiable number of entries (default 5)
+#checks the type of the subject and object of the relation
+#person or entity (organization)
+#and counts the combinations
+#person to organization or organization to organization
+#(object (should always be) a organization)
 def check_relation_type(relation_type, display = 5):
     relation_cursor = Relations.find({'type': relation_type})
     general_count = 0

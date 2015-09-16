@@ -11,7 +11,7 @@ from rdflib import Graph, Literal, BNode, Namespace, RDF, RDFS, URIRef
 FOAF = Namespace('http://xmlns.com/foaf/0.1/')
 DC = Namespace('http://purl.org/dc/elements/1.1/')
 ORG = Namespace("http://www.w3.org/ns/org#")
-CGOV = Namespace('http://reference.data.gov.uk/def/central-government')
+CGOV = Namespace('http://reference.data.gov.uk/def/central-government/')
 
 client = MongoClient()
 db = client.lobbyradar
@@ -150,14 +150,13 @@ def plot_triples(connections_triple, figsize=(20,10)):
     plt.show()
 
 qres = g.query("""
-    SELECT ?c ?d
+    SELECT ?an ?rel ?name
     WHERE {
-          ?a rdf:type cgov:Politican .
-          ?a foaf:member ?b .
-          ?a rdfs:label ?c .
-          ?b rdf:type cgov:Party .
-          ?b rdfs:label ?d .
+          ?an rdfs:label "Angela Merkel" .
+          ?an ?rel ?obj .
+          ?obj rdfs:label ?name .
     }
+    LIMIT 100
     """)
 #for s,p,t in qres:
 #    print(s)
@@ -165,7 +164,8 @@ qres = g.query("""
 #    print(t)
 #    print('-----------')
 #plot_triples([ (con[0].toPython(), con[1].toPython(), con[2].toPython()) for con in qres ])
-#for s in qres:
-#    print s
-#    break
-plot_double(qres, 'member')
+for s in qres:
+    for e in s:
+        print e,
+    print ""
+#plot_triples(qres)
