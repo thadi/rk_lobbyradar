@@ -150,11 +150,12 @@ def plot_triples(connections_triple, figsize=(20,10)):
     plt.show()
 
 qres = g.query("""
-    SELECT ?an ?rel ?name
+    SELECT ?cdu ?rel ?obj_n
     WHERE {
-          ?an rdfs:label "Angela Merkel" .
-          ?an ?rel ?obj .
-          ?obj rdfs:label ?name .
+          ?party rdfs:label "Die Linke" .
+          ?party ?rel ?obj .
+          ?party rdfs:label ?cdu .
+          ?obj rdfs:label ?obj_n .
     }
     LIMIT 100
     """)
@@ -168,4 +169,4 @@ for s in qres:
     for e in s:
         print e,
     print ""
-#plot_triples(qres)
+plot_triples(qres)
