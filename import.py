@@ -68,8 +68,7 @@ def make_special_deklaration(key, source, target, sname, tname):
     elif key == 'government':
         g.add((source, RDF.type, CGOV.Politican))
 
-g = Graph('Sleepycat')
-g.open('lobbyradar', create=True)
+g = Graph()
 
 g.bind("dc", DC)
 g.bind("foaf", FOAF)
