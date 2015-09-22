@@ -9,10 +9,10 @@ def plot(network, figsize=(20,10)):
     for connection in network:
         sub = connection[0]
         G.add_node(sub, typ='sub')
-        if(len(connection) > 2):
+        if(len(connection) > 2 and connection[1] != None):
             obj = connection[1]
             G.add_node(obj, typ='obj')
-            if(len(connection) > 3):
+            if(len(connection) > 3 and connection[2] != None):
                 pro = connection[2]
             else:
                 pro = "connection"
@@ -21,6 +21,31 @@ def plot(network, figsize=(20,10)):
     plt.rcParams['font.family'] = 'sans-serif'
     nx.draw_networkx(G, node_size=600, linewidths=0, font_size=16)
     plt.show()
+
+def entity_has_type(entity, type, graph = g):
+    query = """
+        SELECT ?a
+        WHERE {
+              ?a rdfs:label "%s" .
+              ?a rdf:type %s .
+        }
+        """ % (entity.encode('utf-8'), type)
+    query_result = graph.query(query)
+    return True if len(query_result) > 0 else False
+
+def entities_of_type(type, graph = g):
+    query = """
+        SELECT ?b
+        WHERE {
+              ?a rdf:type %s .
+              ?a rdfs:label ?b .
+        }
+        """ % type
+    query_result = graph.query(query)
+    result = []
+    for a in query_result:
+        result.append(a[0].value)
+    return result
 
 def find_entity(entity, graph = g):
     query = """
@@ -33,7 +58,7 @@ def find_entity(entity, graph = g):
     query_result = graph.query(query)
     result = []
     for a in query_result:
-        result.append((a))
+        result.append((a[0].value, None, None))
     return result
 
 def find_entity_with_type(entity, rdf_type, graph = g):
@@ -48,7 +73,7 @@ def find_entity_with_type(entity, rdf_type, graph = g):
     query_result = graph.query(query)
     result = []
     for a in query_result:
-        result.append((a))
+        result.append((a[0].value, None, None))
     return result
 
 def find_person(entity, graph = g):
@@ -57,11 +82,54 @@ def find_person(entity, graph = g):
 def find_politican(entity, graph = g):
     return find_entity_with_type(entity, 'cgov:Politican')
 
-def find_organisation(entity, graph = g):
+def find_organization(entity, graph = g):
     return find_entity_with_type(entity, 'org:Organization')
 
 def find_party(entity, graph = g):
     return find_entity_with_type(entity, 'cgov:Party')
+
+def entity_object_relation(entity, relation, graph = g):
+    query = """
+        SELECT ?b ?e ?c
+        WHERE {
+              ?a rdfs:label "%s" .
+              ?a rdfs:label ?b .
+              ?d %s ?a .
+              ?d rdfs:label ?e .
+        }
+        """ % (entity, relation)
+    query_result = graph.query(query)
+    result = []
+    for a,b,c in query_result:
+        result.append((a.value, b.value, relation))
+    return result
+
+def entity_subject_relation(entity, relation, graph = g):
+    query = """
+        SELECT ?b ?e ?c
+        WHERE {
+              ?a rdfs:label "%s" .
+              ?a rdfs:label ?b .
+              ?a %s ?d .
+              ?d rdfs:label ?e .
+        }
+        """ % (entity, relation)
+    query_result = graph.query(query)
+    result = []
+    for a,b,c in query_result:
+        result.append((a.value, b.value, relation))
+    return result
+
+def entity_relation(entity, relation, graph = g):
+    return entity_subject_relation(entity, relation) + entity_object_relation(entity, relation)
+
+def politicans_of_party(party, graph = g):
+    env_party = network_entity_level(party, 2)
+    result = []
+    for (s,o,p) in env_party:
+        if(entity_has_type(o, 'cgov:Politican')):
+            result.append((party, o, 'foaf:member'))
+    return result
 
 def network_subject(entity, graph = g):
     query = """
@@ -98,7 +166,7 @@ def network_object(entity, graph = g):
 def network_entity(entity, graph = g):
     return network_subject(entity) + network_object(entity)
 
-def network_entity_level(entity, level, graph = g):
+def network_entity_level(entity, level = 1, graph = g):
     end_result = network_entity(entity)
     current_level = end_result
     next_level = []
@@ -110,7 +178,7 @@ def network_entity_level(entity, level, graph = g):
         next_level = []
     return end_result
 
-def connection(entity, target, max_level, graph = g):
+def connection(entity, target, max_level = 1, graph = g):
     queue = []
     path = []
     network = network_entity(entity)
