@@ -59,6 +59,7 @@ def get_prop(relation_type):
     return get_property(get_property_key(relation_type))
 
 map_got_donation = {}
+
 def make_special_deklaration(key, source, target, sname, tname):
     if key == 'donation':
         if target not in map_got_donation.keys(): map_got_donation[target] = 0

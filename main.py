@@ -1,6 +1,7 @@
 print "loading graph... please wait..."
 import query as q
 import re
+import pprint
 
 result = []
 
@@ -58,14 +59,14 @@ def plot(list):
     return True
 
 def list(list):
-    print result
+    pprint.pprint(result)
     return True
 
 def find_person(param):
     global result
     if len(param) > 0:
         result = q.find_person(param[0])
-        print "your query returned %i results" % len(result)
+        results_info(result)
     else:
         print "missing persons name"
     return True
@@ -74,16 +75,22 @@ def find_politican(param):
     global result
     if len(param) > 0:
         result = q.find_politican(param[0])
-        print "your query returned %i results" % len(result)
+        results_info(result)
     else:
         print "missing politican name"
     return True
+
+
+def results_info(result):
+    print "your query returned %i results" % len(result)
+    print "type plot or list to display your results"
+
 
 def find_organization(param):
     global result
     if len(param) > 0:
         result = q.find_organization(param[0])
-        print "your query returned %i results" % len(result)
+        results_info(result)
     else:
         print "missing organizations name"
     return True
@@ -92,7 +99,7 @@ def find_party(param):
     global result
     if len(param) > 0:
         result = q.find_party(param[0])
-        print "your query returned %i results" % len(result)
+        results_info(result)
     else:
         print "missing party name"
     return True
@@ -101,7 +108,7 @@ def find_entity(param):
     global result
     if len(param) > 0:
         result = q.find_person(param[0])
-        print "your query returned %i results" % len(result)
+        results_info(result)
     else:
         print "missing entity name"
     return True
@@ -110,10 +117,10 @@ def network(param):
     global result
     if len(param) == 1:
         result = q.network_entity_level(param[0])
-        print "your query returned %i results" % len(result)
+        results_info(result)
     elif len(param) > 1:
         result = q.network_entity_level(param[0], int(param[1]))
-        print "your query returned %i results" % len(result)
+        results_info(result)
     else:
         print "missing entity name and depths (default 1)"
     return True
@@ -122,10 +129,10 @@ def connection(param):
     global result
     if len(param) == 2:
         result = q.connection(param[0], param[1])
-        print "your query returned %i results" % len(result)
+        results_info(result)
     elif len(param) > 2:
         result = q.connection(param[0], param[1], int(param[2]))
-        print "your query returned %i results" % len(result)
+        results_info(result)
     else:
         print "missing entity and/or target name and depths (default 1)"
     return True
@@ -134,7 +141,7 @@ def doner_of(param):
     global result
     if len(param) > 0:
         result = q.entity_object_relation(param[0], "org:donation")
-        print "your query returned %i results" % len(result)
+        results_info(result)
     else:
         print "missing party name"
     return True
@@ -143,7 +150,7 @@ def donated(param):
     global result
     if len(param) > 0:
         result = q.entity_subject_relation(param[0], "org:donation")
-        print "your query returned %i results" % len(result)
+        results_info(result)
     else:
         print "missing organization name"
     return True
@@ -165,5 +172,10 @@ cmd_map = {
 }
 
 print "welcome"
-print "enter help if you dont know what the fuck to do :)"
+print "Type in a query. Examples: "
+print "network \"Angela Merkel\" "
+print "doner_of \"FDP\" "
+print "find_organisation \"ag\" "
+print "find_person \"angela m\" "
+print "enter help for the complete user guide."
 menu()
