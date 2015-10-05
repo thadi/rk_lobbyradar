@@ -69,7 +69,7 @@ def get_prop(relation_type):
 
 map_got_donation = {}
 
-def make_special_deklaration(key, source, target, sname, tname):
+def make_special_declaration(key, source, target, sname, tname):
     if key == 'donation':
         if target not in map_got_donation.keys(): map_got_donation[target] = 0
         map_got_donation[target] += 1
@@ -113,7 +113,7 @@ for relation in Relations.find({}):
     if source_type == ORG.Organization and target_type == FOAF.Person:
         source, target = target, source
     prop = get_prop(relation['type'])
-    make_special_deklaration(get_property_key(relation['type']), source, target, source_name, target_name)
+    make_special_declaration(get_property_key(relation['type']), source, target, source_name, target_name)
     if(prop):
         g.add((source, prop, target))
     else:
