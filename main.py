@@ -1,3 +1,14 @@
+"""
+main script to start the application
+use it to explore the rdf-graph of the lobbyradar
+the application is shell-like
+type in commands and append arguments to execute your query
+the result can be plotted or printed out as list
+type in help for more information or try one of the Examples
+please note that arguments have to be in double-quotation marks
+since some arguments could contain spaces
+"""
+
 print "loading graph... please wait..."
 import query as q
 import re
@@ -34,7 +45,7 @@ def help(list):
         help - shows this help
 
         find_person - finds a person by matching name (find_person "name")
-        find_politican - finds a politican by matching name (find_politican "name")
+        find_politician - finds a politican by matching name (find_politician "name")
         find_organization - finds a organization by matching name (find_organization "name")
         find_party - finds a party by matching name (find_party "name")
 
@@ -71,10 +82,10 @@ def find_person(param):
         print "missing persons name"
     return True
 
-def find_politican(param):
+def find_politician(param):
     global result
     if len(param) > 0:
-        result = q.find_politican(param[0])
+        result = q.find_politician(param[0])
         results_info(result)
     else:
         print "missing politican name"
@@ -161,7 +172,7 @@ cmd_map = {
     "plot": plot,
     "list": list,
     "find_person": find_person,
-    "find_politican": find_politican,
+    "find_politician": find_politician,
     "find_organization": find_organization,
     "find_party": find_party,
     "find_entity": find_entity,
@@ -177,5 +188,6 @@ print "network \"Angela Merkel\" "
 print "doner_of \"FDP\" "
 print "find_organisation \"ag\" "
 print "find_person \"angela m\" "
+print "<cmd> \"param1\" ... \"paramn\""
 print "enter help for the complete user guide."
 menu()

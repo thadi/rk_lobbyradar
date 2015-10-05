@@ -1,3 +1,12 @@
+"""
+this script handles the import of the lobbyradar-data from the mongodb
+to an rdf-store
+the import starts by parsing "ontologie.ttl" so the t-box exists
+continues to add all enities to the graph and connects them afterwards
+the graph will be printed out to stdout in turtle-format
+you can pipe the result in a file so the graph is persistend
+"""
+
 import pymongo
 from pymongo import MongoClient
 from bson.son import SON

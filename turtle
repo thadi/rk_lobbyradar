@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<sparql:sparql xmlns:sparql="http://www.w3.org/2005/sparql-results#" xmlns:xml="http://www.w3.org/XML/1998/namespace"><sparql:head><sparql:variable name="b"></sparql:variable><sparql:variable name="c"></sparql:variable><sparql:variable name="e"></sparql:variable></sparql:head><sparql:results></sparql:results></sparql:sparql>
