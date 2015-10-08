@@ -1,8 +1,17 @@
+"""
+in this script you can find all developed queries so far
+every query executes at some point a sparql-query
+what kind of sparql-query , depends on what the query should return
+after the sparql-query is executed its result is casted to a list with tuples
+"""
+
 import networkx as nx
 import matplotlib.pyplot as plt
-import graph
+import rdflib
+from rdflib import Graph
 
-g = graph.g
+g = Graph()
+g.parse('import.ttl', format='turtle')
 
 def plot(network, figsize=(20,10)):
     G = nx.Graph()
@@ -29,16 +38,16 @@ def entity_has_type(entity, type, graph = g):
               ?a rdfs:label "%s" .
               ?a rdf:type %s .
         }
-        """ % (entity.encode('utf-8'), type)
+        """ % (entity, type)
     query_result = graph.query(query)
     return True if len(query_result) > 0 else False
 
 def entities_of_type(type, graph = g):
     query = """
-        SELECT ?b
+        SELECT ?entity_name
         WHERE {
-              ?a rdf:type %s .
-              ?a rdfs:label ?b .
+              ?entity_node rdf:type %s .
+              ?entity_node rdfs:label ?entity_name .
         }
         """ % type
     query_result = graph.query(query)
@@ -49,10 +58,10 @@ def entities_of_type(type, graph = g):
 
 def find_entity(entity, graph = g):
     query = """
-        SELECT ?b
+        SELECT ?entity_name
         WHERE {
-              ?a rdfs:label ?b .
-              FILTER(regex(lcase(str(?b)), ".*?%s.*?", "i"))
+              ?entity_node rdfs:label ?entity_name .
+              FILTER(regex(lcase(str(?entity_name)), ".*?%s.*?", "i"))
         }
         """ % entity.lower()
     query_result = graph.query(query)
@@ -63,11 +72,11 @@ def find_entity(entity, graph = g):
 
 def find_entity_with_type(entity, rdf_type, graph = g):
     query = """
-        SELECT ?c
+        SELECT ?entity_name
         WHERE {
-              ?a rdf:type %s .
-              ?a rdfs:label ?c .
-              FILTER(regex(lcase(str(?c)), ".*?%s.*?", "i"))
+              ?entity_node rdf:type %s .
+              ?entity_node rdfs:label ?entity_name .
+              FILTER(regex(lcase(str(?entity_name)), ".*?%s.*?", "i"))
         }
         """ % (rdf_type, entity.lower())
     query_result = graph.query(query)
@@ -79,7 +88,7 @@ def find_entity_with_type(entity, rdf_type, graph = g):
 def find_person(entity, graph = g):
     return find_entity_with_type(entity, 'foaf:Person')
 
-def find_politican(entity, graph = g):
+def find_politician(entity, graph = g):
     return find_entity_with_type(entity, 'cgov:Politican')
 
 def find_organization(entity, graph = g):
@@ -90,12 +99,12 @@ def find_party(entity, graph = g):
 
 def entity_object_relation(entity, relation, graph = g):
     query = """
-        SELECT ?b ?e ?c
+        SELECT ?entity_name ?related_entity_name ?placeholder
         WHERE {
-              ?a rdfs:label "%s" .
-              ?a rdfs:label ?b .
-              ?d %s ?a .
-              ?d rdfs:label ?e .
+              ?entity_node rdfs:label "%s" .
+              ?entity_node rdfs:label ?entity_name .
+              ?related_entity_node %s ?entity_node .
+              ?related_entity_node rdfs:label ?related_entity_name .
         }
         """ % (entity, relation)
     query_result = graph.query(query)
@@ -106,12 +115,12 @@ def entity_object_relation(entity, relation, graph = g):
 
 def entity_subject_relation(entity, relation, graph = g):
     query = """
-        SELECT ?b ?e ?c
+        SELECT ?entity_name ?related_entity_name ?placeholder
         WHERE {
-              ?a rdfs:label "%s" .
-              ?a rdfs:label ?b .
-              ?a %s ?d .
-              ?d rdfs:label ?e .
+              ?entity_node rdfs:label "%s" .
+              ?entity_node rdfs:label ?entity_name .
+              ?entity_node %s ?related_entity_node .
+              ?related_entity_node rdfs:label ?related_entity_name .
         }
         """ % (entity, relation)
     query_result = graph.query(query)
@@ -127,18 +136,18 @@ def politicans_of_party(party, graph = g):
     env_party = network_entity_level(party, 2)
     result = []
     for (s,o,p) in env_party:
-        if(entity_has_type(o, 'cgov:Politican')):
+        if(entity_has_type(o.encode('utf-8'), 'cgov:Politican')):
             result.append((party, o, 'foaf:member'))
     return result
 
 def network_subject(entity, graph = g):
     query = """
-        SELECT ?b ?e ?c
+        SELECT ?entity_name ?related_name ?relation
         WHERE {
-              ?a rdfs:label "%s" .
-              ?a rdfs:label ?b .
-              ?a ?c ?d .
-              ?d rdfs:label ?e .
+              ?entity_node rdfs:label "%s" .
+              ?entity_node rdfs:label ?entity_name .
+              ?entity_node ?relation ?related_node .
+              ?related_node rdfs:label ?related_name .
         }
         """ % entity
     query_result = graph.query(query)
@@ -149,12 +158,12 @@ def network_subject(entity, graph = g):
 
 def network_object(entity, graph = g):
     query = """
-        SELECT ?b ?e ?c
+        SELECT ?entity_name ?related_name ?relation
         WHERE {
-              ?a rdfs:label "%s" .
-              ?a rdfs:label ?b .
-              ?d ?c ?a .
-              ?d rdfs:label ?e .
+              ?entity_node rdfs:label "%s" .
+              ?entity_node rdfs:label ?entity_name .
+              ?related_node ?relation ?entity_node .
+              ?related_node rdfs:label ?related_name .
         }
         """ % entity
     query_result = graph.query(query)
@@ -172,7 +181,7 @@ def network_entity_level(entity, level = 1, graph = g):
     next_level = []
     for i in range(level - 1):
         for s,o,p in current_level:
-            next_level.extend(network_entity(o))
+            next_level.extend(network_entity(o.encode('utf-8')))
         end_result.extend(next_level)
         current_level = next_level
         next_level = []
@@ -193,7 +202,7 @@ def connection(entity, target, max_level = 1, graph = g):
             return path
         if(node.lvl >= max_level):
             return []
-        element_network = network_entity(node.name)
+        element_network = network_entity(node.name.encode('utf-8'))
         for s,o,p in element_network:
             if(not is_in_node_list(o, queue)):
                 queue.append(Node(o , node.lvl + 1, node, p))

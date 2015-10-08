@@ -1,3 +1,12 @@
+"""
+this script handles the import of the lobbyradar-data from the mongodb
+to an rdf-store
+the import starts by parsing "ontologie.ttl" so the t-box exists
+continues to add all enities to the graph and connects them afterwards
+the graph will be printed out to stdout in turtle-format
+you can pipe the result in a file so the graph is persistend
+"""
+
 import pymongo
 from pymongo import MongoClient
 from bson.son import SON
@@ -60,7 +69,7 @@ def get_prop(relation_type):
 
 map_got_donation = {}
 
-def make_special_deklaration(key, source, target, sname, tname):
+def make_special_declaration(key, source, target, sname, tname):
     if key == 'donation':
         if target not in map_got_donation.keys(): map_got_donation[target] = 0
         map_got_donation[target] += 1
@@ -104,7 +113,7 @@ for relation in Relations.find({}):
     if source_type == ORG.Organization and target_type == FOAF.Person:
         source, target = target, source
     prop = get_prop(relation['type'])
-    make_special_deklaration(get_property_key(relation['type']), source, target, source_name, target_name)
+    make_special_declaration(get_property_key(relation['type']), source, target, source_name, target_name)
     if(prop):
         g.add((source, prop, target))
     else:
