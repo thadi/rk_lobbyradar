@@ -1,7 +1,4 @@
 # rk_lobbyradar
 
-initial usage
-python import.py > import.tll
+a full documentation (in German!!!) can be found in the file "Feddersen_Sternberg_Wissenrepraesentationsprojekt".
 
-then
-python main.py
